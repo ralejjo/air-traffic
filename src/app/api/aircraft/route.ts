@@ -1,7 +1,8 @@
 import { aircraftQuerySchema, AircraftProviderError } from "@/features/airtraffic/aircraft";
 import { getAircraft } from "@/features/airtraffic/aircraftService";
 
-// Ruta dinámica sin desactivar la caché explícita de cinco segundos del proveedor.
+export const runtime = "edge";
+
 export const revalidate = 0;
 const headers = { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" };
 

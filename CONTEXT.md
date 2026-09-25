@@ -17,7 +17,7 @@ Entrega local de la etapa 1: mapa base, cuatro ciudades, controles y `/api/healt
 - SQLite con Drizzle para ubicaciones de visitantes anónimos en etapa 4.
 - Sin KV, Object Storage, login ni backend separado en el MVP.
 - No mostrar mocks como vuelos reales, ni describir datos ausentes como sistemas apagados.
-- No forzar runtime edge de Next.js: el adaptador OpenNext ejecuta los handlers en Workers.
+- Los Route Handlers de API usan `runtime = "edge"` para que las consultas salientes se ejecuten en el runtime Workers de Webflow, manteniendo el resto de la app en el runtime Node de Next/OpenNext.
 
 ## Verificación
 
