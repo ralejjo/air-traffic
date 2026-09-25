@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { aircraftQuerySchema } from "../src/features/airtraffic/aircraft.ts";
 import { fetchAdsbFi, normalizeAircraft, retryAfterSeconds } from "../src/infrastructure/aircraft/adsbFi.ts";
+import { normalizeOpenSky } from "../src/infrastructure/aircraft/openSky.ts";
 
 const area = { lat: 51.5072, lon: -0.1276, radiusNm: 100 };
 const position = { hex: "ABC123", lat: 51, lon: 0, seen_pos: 0 };
@@ -28,6 +29,20 @@ test("descarta posiciones inválidas, antiguas o sin antigüedad", () => {
 test("distingue ausencia de vuelos de respuesta malformada", () => {
   assert.deepEqual(normalizeAircraft({ ac: [] }).aircraft, []);
   assert.throws(() => normalizeAircraft({ error: "failed" }), { code: "PROVIDER_INVALID_RESPONSE" });
+});
+test("normaliza OpenSky como fallback y filtra el radio", () => {
+  const now = 1700000000;
+  const snapshot = normalizeOpenSky({ time: now, states: [
+    ["abc123", " TEST ", "Test", now, now, -0.1, 51.5, 1000, false, 100, 90, 0],
+    ["def456", "OUTSIDE", "Test", now, now, 10, 0, 1000, false, 100, 90, 0],
+  ] }, area);
+  assert.equal(snapshot.fetchedAt, "2023-11-14T22:13:20.000Z");
+  assert.equal(snapshot.aircraft.length, 1);
+  assert.equal(snapshot.aircraft[0].id, "abc123");
+  assert.equal(snapshot.aircraft[0].altitudeFt, 3281);
+  assert.equal(snapshot.aircraft[0].speedKt, 194.4);
+  assert.equal(snapshot.aircraft[0].headingDeg, 90);
+  assert.equal(snapshot.aircraft[0].registration, null);
 });
 test("conserva fecha de origen para no rejuvenecer la caché", () => {
   assert.equal(normalizeAircraft({ ac: [], now: 1700000000000 }).fetchedAt, "2023-11-14T22:13:20.000Z");
