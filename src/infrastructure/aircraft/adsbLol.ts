@@ -55,7 +55,17 @@ export async function fetchAdsbLol(area: AircraftArea, fetcher: typeof fetch = f
       cache: "force-cache",
       next: { revalidate: 5 },
     });
-    if (response.status === 429) throw new AircraftProviderError("RATE_LIMITED", 429, "El proveedor limitó las consultas. Reintentá en unos segundos.", retryAfterSeconds(response.headers.get("retry-after")));
+    if (response.status === 429) {
+      // Solo metadatos públicos de la respuesta externa; nunca cuerpos, cookies o credenciales.
+      console.warn("aircraft_provider_rate_limit", {
+        status: response.status,
+        contentType: response.headers.get("content-type"),
+        server: response.headers.get("server"),
+        retryAfter: response.headers.get("retry-after"),
+        ray: response.headers.get("cf-ray"),
+      });
+      throw new AircraftProviderError("RATE_LIMITED", 429, "El proveedor limitó las consultas. Reintentá en unos segundos.", retryAfterSeconds(response.headers.get("retry-after")));
+    }
     if (!response.ok) throw new AircraftProviderError("PROVIDER_UNAVAILABLE", 502, "No pudimos consultar las aeronaves.");
     let payload: unknown;
     try { payload = await response.json(); }
