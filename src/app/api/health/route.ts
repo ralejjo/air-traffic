@@ -1,6 +1,5 @@
 // OpenNext adapta este Route Handler a Workers.
 // Salud de la aplicación; la disponibilidad del proveedor se verifica en /api/aircraft.
-export const runtime = "edge";
 export const dynamic = "force-dynamic";
 export async function GET() {
   return Response.json(
