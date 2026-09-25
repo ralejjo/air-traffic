@@ -15,6 +15,9 @@ export const texts = {
   serviceOk: "Servicio disponible",
   serviceError: "Servicio sin conexión",
   dataPending: "Tráfico aéreo pendiente de conexión",
+  dataLoading: "Actualizando tráfico aéreo…",
+  dataError: "No pudimos actualizar el tráfico aéreo",
+  dataUpdated: "Tráfico aéreo actualizado",
   legend:
     "En esta primera versión podés explorar el mapa. Las aeronaves y su telemetría estarán disponibles en la siguiente entrega.",
 } as const;

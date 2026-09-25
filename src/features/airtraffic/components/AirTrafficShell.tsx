@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowDownLeft,
@@ -17,6 +17,7 @@ import {
   Server,
   Wind,
 } from "lucide-react";
+import type { Aircraft } from "@/features/airtraffic/aircraft";
 import { defaultLocation, locations } from "@/infrastructure/maps/mapConfig";
 import { apiPath } from "@/shared/config";
 import { texts } from "@/shared/texts";
@@ -34,6 +35,7 @@ const coordinate = new Intl.NumberFormat("es-AR", {
   minimumFractionDigits: 4,
   maximumFractionDigits: 4,
 });
+const emptyAircraft: Aircraft[] = [];
 
 export function AirTrafficShell() {
   const [location, setLocation] = useState(defaultLocation);
@@ -43,6 +45,36 @@ export function AirTrafficShell() {
     latitude: defaultLocation.coordinates[1],
     zoom: defaultLocation.zoom,
   });
+  const [queryViewport, setQueryViewport] = useState(viewport);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setQueryViewport(viewport), 800);
+    return () => window.clearTimeout(timer);
+  }, [viewport]);
+  const aircraft = useQuery({
+    queryKey: [
+      "aircraft",
+      queryViewport.latitude.toFixed(4),
+      queryViewport.longitude.toFixed(4),
+      "100",
+    ],
+    queryFn: async ({ signal }) => {
+      const params = new URLSearchParams({
+        lat: queryViewport.latitude.toFixed(4),
+        lon: queryViewport.longitude.toFixed(4),
+        radiusNm: "100",
+      });
+      const response = await fetch(apiPath(`aircraft?${params}`), {
+        signal,
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error("No pudimos consultar las aeronaves.");
+      return (await response.json()) as { aircraft: Aircraft[] };
+    },
+    refetchInterval: 10_000,
+    refetchIntervalInBackground: false,
+  });
+  const aircraftList = aircraft.data?.aircraft ?? emptyAircraft;
   const health = useQuery({
     queryKey: ["health"],
     queryFn: async ({ signal }) => {
@@ -139,6 +171,9 @@ export function AirTrafficShell() {
                 location={location}
                 resetCount={resetCount}
                 onMove={setViewport}
+                aircraft={aircraftList}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
               />
               <div className="location-card">
                 <MapPin size={18} />
@@ -163,9 +198,13 @@ export function AirTrafficShell() {
                 <span />
                 <span />
               </div>
-              <div className="map-note">
+              <div className="map-note" role="status">
                 <Radio size={14} />
-                {texts.dataPending}
+                {aircraft.isPending
+                  ? texts.dataLoading
+                  : aircraft.isError
+                    ? texts.dataError
+                    : texts.dataUpdated}
               </div>
             </div>
             <aside className="detail-panel" aria-labelledby="detail-title">

@@ -12,6 +12,7 @@ import {
 } from "@/infrastructure/maps/mapConfig";
 import { texts } from "@/shared/texts";
 import { basePath } from "@/shared/config";
+import type { Aircraft } from "@/features/airtraffic/aircraft";
 
 export type ViewportInfo = {
   longitude: number;
@@ -22,12 +23,16 @@ type Props = {
   location: MapLocation;
   resetCount: number;
   onMove: (viewport: ViewportInfo) => void;
+  aircraft: Aircraft[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
 };
 
-export default function AirTrafficMap({ location, resetCount, onMove }: Props) {
+export default function AirTrafficMap({ location, resetCount, onMove, aircraft, selectedId, onSelect }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<MapInstance | null>(null);
   const callback = useRef(onMove);
+  const selectCallback = useRef(onSelect);
   const [state, setState] = useState<
     "loading" | "ready" | "error" | "unsupported"
   >("loading");
@@ -35,7 +40,8 @@ export default function AirTrafficMap({ location, resetCount, onMove }: Props) {
 
   useEffect(() => {
     callback.current = onMove;
-  }, [onMove]);
+    selectCallback.current = onSelect;
+  }, [onMove, onSelect]);
 
   useEffect(() => {
     if (!container.current) return;
@@ -93,6 +99,41 @@ export default function AirTrafficMap({ location, resetCount, onMove }: Props) {
           ]);
         }
       }
+      instance.addSource("aircraft", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      });
+      instance.addLayer({
+        id: "aircraft-hit",
+        type: "circle",
+        source: "aircraft",
+        paint: {
+          "circle-radius": ["case", ["==", ["get", "id"], ""], 11, 8],
+          "circle-color": "#172020",
+          "circle-stroke-color": "#d8f58b",
+          "circle-stroke-width": 2,
+          "circle-opacity": 0.9,
+        },
+      });
+      instance.addLayer({
+        id: "aircraft-icon",
+        type: "symbol",
+        source: "aircraft",
+        layout: {
+          "text-field": "✈",
+          "text-size": 15,
+          "text-rotate": ["coalesce", ["get", "heading"], 0],
+          "text-rotation-alignment": "map",
+          "text-allow-overlap": true,
+        },
+        paint: { "text-color": "#d8f58b", "text-halo-color": "#172020", "text-halo-width": 1 },
+      });
+      instance.on("click", "aircraft-hit", (event) => {
+        const id = event.features?.[0]?.properties?.id;
+        if (typeof id === "string") selectCallback.current(id);
+      });
+      instance.on("mouseenter", "aircraft-hit", () => { instance.getCanvas().style.cursor = "pointer"; });
+      instance.on("mouseleave", "aircraft-hit", () => { instance.getCanvas().style.cursor = ""; });
       setState("ready");
       reportView();
     });
@@ -109,6 +150,22 @@ export default function AirTrafficMap({ location, resetCount, onMove }: Props) {
       map.current = null;
     };
   }, [attempt]);
+
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance?.isStyleLoaded()) return;
+    const source = instance.getSource("aircraft") as maplibregl.GeoJSONSource | undefined;
+    source?.setData({
+      type: "FeatureCollection",
+      features: aircraft.map((plane) => ({
+        type: "Feature" as const,
+        geometry: { type: "Point" as const, coordinates: [plane.longitude, plane.latitude] },
+        properties: { id: plane.id, heading: plane.headingDeg },
+      })),
+    });
+    instance.setPaintProperty("aircraft-hit", "circle-radius", ["case", ["==", ["get", "id"], selectedId ?? ""], 12, 8]);
+    instance.setPaintProperty("aircraft-hit", "circle-color", ["case", ["==", ["get", "id"], selectedId ?? ""], "#d8f58b", "#172020"]);
+  }, [aircraft, selectedId, state]);
 
   useEffect(() => {
     map.current?.flyTo({

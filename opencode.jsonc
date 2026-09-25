@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "webflow": {
+        "type": "remote",
+        "url": "https://mcp.webflow.com/mcp"
+      }
+    }
+  }
+}
