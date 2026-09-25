@@ -10,7 +10,7 @@ Respuesta exitosa: `aircraft`, `area`, `fetchedAt` y `source`. Cada aeronave con
 
 Errores JSON: `error.code` y `error.message` en español. Consulta inválida: 400; límite del proveedor: 429 con `Retry-After`; proveedor inaccesible o respuesta inválida: 502; timeout de cinco segundos: 504. No se devuelven mensajes internos del proveedor.
 
-La consulta externa pide caché de cinco segundos a Next/OpenNext; el endpoint responde `Cache-Control: no-store`. `fetchedAt` conserva el timestamp original del proveedor para no rejuvenecer una respuesta cacheada. La caché es una optimización: no se presupone almacenamiento compartido entre instancias ni se agregan bindings. Su comportamiento efectivo en Webflow queda pendiente de comprobar tras el push.
+La consulta externa y el endpoint usan `Cache-Control: no-store`. La caché de `fetch` de Next/OpenNext se retiró porque las respuestas exitosas de adsb.fi terminaban en HTTP 502 al ejecutarse en Webflow. El frontend limitará el polling a una consulta cada diez segundos, dentro del máximo público de adsb.fi de una solicitud por segundo. No se agregan bindings.
 
 `/api/health` verifica la aplicación, no realiza una llamada al proveedor. `aircraftProvider: not_checked` significa que debe comprobarse `/api/aircraft` por separado.
 
@@ -27,7 +27,7 @@ La consulta externa pide caché de cinco segundos a Next/OpenNext; el endpoint r
 
 ### Verificación del primer push
 
-Webflow publicó correctamente el commit `7bdb8fe` el 25/09/2026. Salud HTTP 200 y validación de consultas HTTP 400 comprobadas en producción. ADSB.lol devolvió una página HTML de Cloudflare con HTTP 429 desde Webflow, sin `Retry-After`, aunque funcionaba localmente. Para cumplir el plazo se reemplazó por adsb.fi, compatible con el mismo formato. La verificación desde Webflow requiere el próximo push.
+Webflow publicó correctamente el commit `7bdb8fe` el 25/09/2026. Salud HTTP 200 y validación de consultas HTTP 400 comprobadas en producción. ADSB.lol devolvió una página HTML de Cloudflare con HTTP 429 desde Webflow, sin `Retry-After`, aunque funcionaba localmente. Se reemplazó por adsb.fi, compatible con el mismo formato. El primer despliegue con adsb.fi devolvió HTTP 502 en respuestas válidas; se retiró la caché de `fetch` de Next/OpenNext como causa probable y queda pendiente verificar el siguiente push.
 
 No se incorporan SQLite, Drizzle, KV, Object Storage, favoritos, autenticación, trayectorias ni interpolación. Los datos proceden de [adsb.fi](https://adsb.fi/) y se usan en este sistema de muestra no comercial con atribución. Su API pública permite una solicitud por segundo; la interfaz utilizará una cada diez segundos. Su cobertura y disponibilidad pueden variar. No se muestran vuelos ficticios.
 
