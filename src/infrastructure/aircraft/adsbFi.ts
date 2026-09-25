@@ -4,6 +4,7 @@ import { AircraftProviderError, type Aircraft, type AircraftArea } from "../../f
 const envelopeSchema = z.object({ ac: z.array(z.unknown()), now: z.number().finite().optional() });
 const text = (value: unknown) => typeof value === "string" ? value.trim() || null : null;
 const numeric = (value: unknown) => typeof value === "number" && Number.isFinite(value) ? value : null;
+type WorkerRequestInit = RequestInit & { cf?: { scrapeShield?: boolean } };
 
 export function normalizeAircraft(payload: unknown): { aircraft: Aircraft[]; fetchedAt: string } {
   const parsed = envelopeSchema.safeParse(payload);
@@ -54,11 +55,14 @@ export async function fetchAdsbFi(area: AircraftArea, fetcher: typeof fetch = fe
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetcher(`https://opendata.adsb.fi/api/v3/lat/${area.lat}/lon/${area.lon}/dist/${area.radiusNm}`, {
+    const requestInit: WorkerRequestInit = {
       headers: { "User-Agent": "AirTraffic/0.1 (https://github.com/ralejjo/air-traffic)", Accept: "application/json" },
       signal: controller.signal,
       cache: "no-store",
-    });
+      // adsb.fi está detrás de Cloudflare; no aplicar su protección anti-bot al subrequest.
+      cf: { scrapeShield: false },
+    };
+    const response = await fetcher(`https://opendata.adsb.fi/api/v3/lat/${area.lat}/lon/${area.lon}/dist/${area.radiusNm}`, requestInit);
     if (response.status === 429) throw new AircraftProviderError("RATE_LIMITED", 429, "El proveedor limitó las consultas. Reintentá en unos segundos.", retryAfterSeconds(response.headers.get("retry-after")));
     if (!response.ok) throw new AircraftProviderError("PROVIDER_UNAVAILABLE", 502, "No pudimos consultar las aeronaves.");
     let payload: unknown;
