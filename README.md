@@ -14,7 +14,7 @@ Primera entrega del proyecto: base de Next.js, mapa interactivo y servicio de sa
 - Estados de carga, error de cartografía y reintento.
 - `GET /api/health`, consultado por el indicador de servicio de la interfaz.
 
-Las aeronaves reales se conectan en la etapa 2. El mapa no incluye vuelos ficticios. SQLite y las ubicaciones guardadas se incorporan en la etapa 4. Un servidor disponible no implica que ADSB.lol ni SQLite estén conectados.
+Las aeronaves reales se conectan en la siguiente entrega de interfaz. El mapa no incluye vuelos ficticios. Un servidor disponible no implica que adsb.fi esté respondiendo.
 
 ## Requisitos y ejecución local
 
@@ -91,7 +91,11 @@ El mapa se importa de forma diferida, solo en el navegador. El backend no utiliz
 
 Los comandos `dev` y `build` ejecutan automáticamente `scripts/prepare-map.mjs`: copia el worker y su módulo compartido desde la versión instalada de MapLibre a `public/maplibre/`. Estos archivos generados no se versionan. Así se evita que el empaquetado de Next.js rompa la URL del worker.
 
-## Cartografía y atribución
+## Datos y atribución
+
+[adsb.fi](https://adsb.fi/) provee las posiciones para este sistema de muestra no comercial. Su API pública limita las consultas a una por segundo y se ofrece sin garantía de disponibilidad. AirTraffic consulta como máximo cada diez segundos desde la interfaz.
+
+### Cartografía
 
 [OpenFreeMap](https://openfreemap.org/) provee la cartografía, con esquema de [OpenMapTiles](https://openmaptiles.org/) y datos de [OpenStreetMap](https://www.openstreetmap.org/copyright). MapLibre conserva sus atribuciones en el mapa. Los nombres usan español cuando está disponible y, en su defecto, el nombre local.
 

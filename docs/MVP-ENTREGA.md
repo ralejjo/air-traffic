@@ -27,8 +27,8 @@ La consulta externa pide caché de cinco segundos a Next/OpenNext; el endpoint r
 
 ### Verificación del primer push
 
-Webflow publicó correctamente el commit `7bdb8fe` el 25/09/2026. Salud HTTP 200 y validación de consultas HTTP 400 comprobadas en producción. Sin embargo, la consulta válida de Londres recibió HTTP 429 del proveedor en tres intentos espaciados, mientras la consulta local devolvió HTTP 200. No se ha confirmado todavía acceso a aeronaves desde Webflow. Se agregaron logs de metadatos de la respuesta externa (sin cuerpo ni credenciales) para investigar; requieren un nuevo push. La etapa 2 permanece pendiente de resolver esta integración, según el plan acordado.
+Webflow publicó correctamente el commit `7bdb8fe` el 25/09/2026. Salud HTTP 200 y validación de consultas HTTP 400 comprobadas en producción. ADSB.lol devolvió una página HTML de Cloudflare con HTTP 429 desde Webflow, sin `Retry-After`, aunque funcionaba localmente. Para cumplir el plazo se reemplazó por adsb.fi, compatible con el mismo formato. La verificación desde Webflow requiere el próximo push.
 
-No se incorporan SQLite, Drizzle, KV, Object Storage, favoritos, autenticación, trayectorias ni interpolación. Los datos proceden de [ADSB.lol](https://www.adsb.lol/); su cobertura y límites de consulta pueden variar. No se muestran vuelos ficticios.
+No se incorporan SQLite, Drizzle, KV, Object Storage, favoritos, autenticación, trayectorias ni interpolación. Los datos proceden de [adsb.fi](https://adsb.fi/) y se usan en este sistema de muestra no comercial con atribución. Su API pública permite una solicitud por segundo; la interfaz utilizará una cada diez segundos. Su cobertura y disponibilidad pueden variar. No se muestran vuelos ficticios.
 
 El usuario realiza todos los commits y pushes. Desarrollo directamente en `D:\air-traffic`. No se crean repositorios adicionales ni ZIP.

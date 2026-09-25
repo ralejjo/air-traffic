@@ -46,26 +46,16 @@ export function retryAfterSeconds(value: string | null, now = Date.now()): numbe
   return Number.isFinite(date) ? Math.max(1, Math.ceil((date - now) / 1000)) : 30;
 }
 
-export async function fetchAdsbLol(area: AircraftArea, fetcher: typeof fetch = fetch, timeoutMs = 5000) {
+export async function fetchAdsbFi(area: AircraftArea, fetcher: typeof fetch = fetch, timeoutMs = 5000) {
   const signal = AbortSignal.timeout(timeoutMs);
   try {
-    const response = await fetcher(`https://api.adsb.lol/v2/point/${area.lat}/${area.lon}/${area.radiusNm}`, {
+    const response = await fetcher(`https://opendata.adsb.fi/api/v3/lat/${area.lat}/lon/${area.lon}/dist/${area.radiusNm}`, {
       headers: { "User-Agent": "AirTraffic/0.1 (https://github.com/ralejjo/air-traffic)", Accept: "application/json" },
       signal,
       cache: "force-cache",
       next: { revalidate: 5 },
     });
-    if (response.status === 429) {
-      // Solo metadatos públicos de la respuesta externa; nunca cuerpos, cookies o credenciales.
-      console.warn("aircraft_provider_rate_limit", {
-        status: response.status,
-        contentType: response.headers.get("content-type"),
-        server: response.headers.get("server"),
-        retryAfter: response.headers.get("retry-after"),
-        ray: response.headers.get("cf-ray"),
-      });
-      throw new AircraftProviderError("RATE_LIMITED", 429, "El proveedor limitó las consultas. Reintentá en unos segundos.", retryAfterSeconds(response.headers.get("retry-after")));
-    }
+    if (response.status === 429) throw new AircraftProviderError("RATE_LIMITED", 429, "El proveedor limitó las consultas. Reintentá en unos segundos.", retryAfterSeconds(response.headers.get("retry-after")));
     if (!response.ok) throw new AircraftProviderError("PROVIDER_UNAVAILABLE", 502, "No pudimos consultar las aeronaves.");
     let payload: unknown;
     try { payload = await response.json(); }

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { aircraftQuerySchema } from "../src/features/airtraffic/aircraft.ts";
-import { fetchAdsbLol, normalizeAircraft, retryAfterSeconds } from "../src/infrastructure/aircraft/adsbLol.ts";
+import { fetchAdsbFi, normalizeAircraft, retryAfterSeconds } from "../src/infrastructure/aircraft/adsbFi.ts";
 
 const area = { lat: 51.5072, lon: -0.1276, radiusNm: 100 };
 const position = { hex: "ABC123", lat: 51, lon: 0, seen_pos: 0 };
@@ -36,16 +36,16 @@ test("429 conserva Retry-After numérico o fecha y usa fallback", async () => {
   assert.equal(retryAfterSeconds("12"), 12);
   assert.equal(retryAfterSeconds(null), 30);
   assert.equal(retryAfterSeconds("Thu, 01 Jan 1970 00:01:00 GMT", 0), 60);
-  await assert.rejects(fetchAdsbLol(area, async () => new Response(null, { status: 429, headers: { "Retry-After": "12" } })), { code: "RATE_LIMITED", status: 429, retryAfterSeconds: 12 });
+  await assert.rejects(fetchAdsbFi(area, async () => new Response(null, { status: 429, headers: { "Retry-After": "12" } })), { code: "RATE_LIMITED", status: 429, retryAfterSeconds: 12 });
 });
 test("timeout cancela solicitud y retorna error controlado", async () => {
   const fetcher: typeof fetch = async (_url, init) => new Promise((_resolve, reject) => {
     const timer = setTimeout(() => reject(new Error("No se canceló")), 1000);
     init?.signal?.addEventListener("abort", () => { clearTimeout(timer); reject(init.signal?.reason); }, { once: true });
   });
-  await assert.rejects(fetchAdsbLol(area, fetcher, 10), { code: "PROVIDER_TIMEOUT", status: 504 });
+  await assert.rejects(fetchAdsbFi(area, fetcher, 10), { code: "PROVIDER_TIMEOUT", status: 504 });
 });
 test("errores HTTP y JSON inválido no se convierten en lista vacía", async () => {
-  await assert.rejects(fetchAdsbLol(area, async () => new Response(null, { status: 503 })), { code: "PROVIDER_UNAVAILABLE" });
-  await assert.rejects(fetchAdsbLol(area, async () => new Response("not json")), { code: "PROVIDER_INVALID_RESPONSE" });
+  await assert.rejects(fetchAdsbFi(area, async () => new Response(null, { status: 503 })), { code: "PROVIDER_UNAVAILABLE" });
+  await assert.rejects(fetchAdsbFi(area, async () => new Response("not json")), { code: "PROVIDER_INVALID_RESPONSE" });
 });

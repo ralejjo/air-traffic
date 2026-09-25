@@ -25,7 +25,7 @@ export type AircraftSnapshot = {
   aircraft: Aircraft[];
   area: AircraftArea;
   fetchedAt: string;
-  source: "ADSB.lol";
+  source: "adsb.fi";
 };
 
 export class AircraftProviderError extends Error {

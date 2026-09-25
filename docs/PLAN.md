@@ -5,7 +5,7 @@ MVP de aproximadamente 20 horas de trabajo efectivo. Interfaz en español. Repos
 | Etapa | Entrega                                                                                                                   |
 | ----- | ------------------------------------------------------------------------------------------------------------------------- |
 | 1     | Starter Next.js, mapa base y endpoint de salud. ZIP para subida manual. Primer deployment pendiente del push del usuario. |
-| 2     | Adaptador ADSB.lol, normalización, validación, timeout y manejo de errores.                                               |
+| 2     | Adaptador adsb.fi, normalización, validación, timeout y manejo de errores.                                                |
 | 3     | Aeronaves GeoJSON, selección, telemetría, métricas y filtros.                                                             |
 | 4     | Ubicaciones guardadas por visitante anónimo en SQLite + Drizzle.                                                          |
 | 5     | Interpolación, trayectorias de sesión y refinamiento responsive.                                                          |
@@ -14,7 +14,7 @@ MVP de aproximadamente 20 horas de trabajo efectivo. Interfaz en español. Repos
 
 ## Arquitectura acordada
 
-Navegador (React, TanStack Query, MapLibre) → Next.js Route Handlers → servicio de aeronaves → adaptador ADSB.lol. La cartografía usa OpenFreeMap, sin claves. SQLite se reserva para ubicaciones guardadas, no posiciones live.
+Navegador (React, TanStack Query, MapLibre) → Next.js Route Handlers → servicio de aeronaves → adaptador adsb.fi. ADSB.lol fue reemplazado por un bloqueo HTTP 429 desde Webflow. La cartografía usa OpenFreeMap, sin claves.
 
 `GET /api/aircraft?lat=...&lon=...&radiusNm=...`: coordenadas válidas, radio 1–250 NM, timeout de 5 segundos, contrato normalizado e información opcional nullable. Descartar posiciones inválidas o con más de 60 segundos. Polling de 10 segundos visible, debounce de 800 ms al mover y cancelación de solicitudes obsoletas. Mantener el último snapshot de la misma zona con antigüedad visible ante fallos.
 

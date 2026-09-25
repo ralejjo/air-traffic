@@ -13,7 +13,7 @@ Entrega local de la etapa 1: mapa base, cuatro ciudades, controles y `/api/healt
 - El usuario crea el repositorio, hace commits y pushes. El agente no debe hacerlo.
 - Detener esta entrega antes de publicar. Webflow MCP se usará después del push del usuario.
 - OpenFreeMap, sin clave, reemplaza a MapTiler en esta entrega.
-- Próximo backend: Route Handlers → AircraftService → adaptador ADSB.lol.
+- Backend: Route Handlers → AircraftService → adaptador adsb.fi. Reemplazó a ADSB.lol porque su protección de Cloudflare devolvía HTTP 429 desde Webflow.
 - SQLite con Drizzle para ubicaciones de visitantes anónimos en etapa 4.
 - Sin KV, Object Storage, login ni backend separado en el MVP.
 - No mostrar mocks como vuelos reales, ni describir datos ausentes como sistemas apagados.
