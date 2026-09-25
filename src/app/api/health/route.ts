@@ -1,5 +1,5 @@
 // OpenNext adapta este Route Handler a Workers.
-// SQLite se incorporará en la etapa 4; no se informa como conectado todavía.
+// Salud de la aplicación; la disponibilidad del proveedor se verifica en /api/aircraft.
 export const dynamic = "force-dynamic";
 export async function GET() {
   return Response.json(
@@ -11,7 +11,7 @@ export async function GET() {
       checks: {
         application: "ok",
         database: "not_configured",
-        aircraftProvider: "not_connected",
+        aircraftProvider: "not_checked",
       },
     },
     {

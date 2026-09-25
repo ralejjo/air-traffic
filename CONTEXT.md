@@ -4,6 +4,8 @@ Aplicación Next.js App Router / React / TypeScript para explorar tráfico aére
 
 ## Estado
 
+Plan vigente: `docs/MVP-ENTREGA.md`, cuatro etapas con presupuesto objetivo de cinco horas. Endpoint de aeronaves implementado, pendiente de push del usuario y validación en Webflow. No implementar persistencia ni las ampliaciones del plan original. Commits y pushes siguen siendo exclusivamente del usuario.
+
 Entrega local de la etapa 1: mapa base, cuatro ciudades, controles y `/api/health`. Sin vuelos ni persistencia todavía. Ver `README.md`, `docs/PLAN.md` y `docs/VALIDACION.md`.
 
 ## Decisiones

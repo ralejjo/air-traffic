@@ -1,5 +1,7 @@
 # AirTraffic — Explorador de tráfico aéreo
 
+> Plan vigente: [MVP en cuatro etapas y estado del backend](docs/MVP-ENTREGA.md). El backend de aeronaves está implementado; la interfaz de vuelos y su verificación en Webflow están pendientes del primer push. El resto de este documento describe la entrega inicial del mapa.
+
 Primera entrega del proyecto: base de Next.js, mapa interactivo y servicio de salud. Interfaz oscura en español, preparada para publicar como aplicación independiente en Webflow Cloud.
 
 ## Qué funciona en esta entrega
@@ -43,7 +45,7 @@ Abrir http://localhost:3000/api/health. Debe responder HTTP 200 con `status: "ok
 {
   "application": "ok",
   "database": "not_configured",
-  "aircraftProvider": "not_connected"
+  "aircraftProvider": "not_checked"
 }
 ```
 
