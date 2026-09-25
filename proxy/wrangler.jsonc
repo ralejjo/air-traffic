@@ -1,0 +1,6 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "air-traffic-adsb-proxy",
+  "main": "worker.mjs",
+  "compatibility_date": "2025-05-05"
+}
